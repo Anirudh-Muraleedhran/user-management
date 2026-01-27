@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import API from "../services/api";
 import "../styles/form.css";
 
 export default function Login() {
@@ -8,14 +9,24 @@ export default function Login() {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
 
-    if (email === "admin@example.com" && password === "admin123") {
-      localStorage.setItem("token", "mock-jwt-token");
+    try {
+      const res = await API.post("/auth/login", {
+        email,
+        password,
+      });
+
+      localStorage.setItem("token", res.data.access_token);
+      localStorage.setItem("user", JSON.stringify(res.data.user));
+
       navigate("/users");
-    } else {
-      setError("Invalid email or password");
+    } catch (err) {
+      setError(
+        err.response?.data?.msg || "Login failed. Check credentials."
+      );
     }
   };
 
