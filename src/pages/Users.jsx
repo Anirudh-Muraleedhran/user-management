@@ -1,20 +1,24 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import API from "../services/api";
 import "../styles/form.css";
 
 export default function Users() {
   const [users, setUsers] = useState([]);
 
+  const fetchUsers = async () => {
+    const res = await API.get("/users");
+    setUsers(res.data);
+  };
+
   useEffect(() => {
-    setUsers([
-      { id: 1, name: "Admin User", email: "admin@example.com", role: "Admin" },
-      { id: 2, name: "John Doe", email: "john@example.com", role: "User" },
-    ]);
+    fetchUsers();
   }, []);
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm("Are you sure?")) {
-      setUsers(users.filter((u) => u.id !== id));
+      await API.delete(`/users/${id}`);
+      fetchUsers();
     }
   };
 
@@ -38,19 +42,19 @@ export default function Users() {
         </thead>
 
         <tbody>
-          {users.map((user) => (
-            <tr key={user.id}>
-              <td>{user.id}</td>
-              <td>{user.name}</td>
-              <td>{user.email}</td>
-              <td>{user.role}</td>
+          {users.map((u) => (
+            <tr key={u.id}>
+              <td>{u.id}</td>
+              <td>{u.name}</td>
+              <td>{u.email}</td>
+              <td>{u.role}</td>
               <td className="table-actions">
-                <Link to={`/users/edit/${user.id}`}>
+                <Link to={`/users/edit/${u.id}`}>
                   <button className="btn-secondary">Edit</button>
                 </Link>
                 <button
                   className="btn-danger"
-                  onClick={() => handleDelete(user.id)}
+                  onClick={() => handleDelete(u.id)}
                 >
                   Delete
                 </button>

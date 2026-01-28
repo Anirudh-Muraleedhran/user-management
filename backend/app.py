@@ -8,7 +8,26 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object("config.Config")
 
-    CORS(app)
+    app.url_map.strict_slashes = False  
+
+    CORS(
+        app,
+        resources={r"/api/*": {"origins": "http://localhost:5173"}},
+        supports_credentials=True
+    )
+
+    db.init_app(app)
+    jwt.init_app(app)
+
+    app.register_blueprint(auth_bp, url_prefix="/api/auth")
+    app.register_blueprint(users_bp, url_prefix="/api/users")
+
+    with app.app_context():
+        db.create_all()
+
+    return app
+
+
     db.init_app(app)
     jwt.init_app(app)
 

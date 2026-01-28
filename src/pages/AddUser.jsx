@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/form.css";
+import API from "../services/api";
+
 
 export default function AddUser() {
   const navigate = useNavigate();
@@ -21,21 +23,18 @@ export default function AddUser() {
     });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError("");
 
-    // Basic validation
-    if (!formData.name || !formData.email || !formData.password) {
-      setError("All fields are required");
-      return;
-    }
-
-    // TEMP: mock create user
-    console.log("New User:", formData);
-
-    // Later → API.post("/users", formData)
+  try {
+    await API.post("/users", formData);
     navigate("/users");
-  };
+  } catch (err) {
+    setError(err.response?.data?.msg || "Failed to create user");
+  }
+};
+
 
   return (
     <div className="form-container">

@@ -15,20 +15,17 @@ export default function EditUser() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    // TEMP: mock fetch user by ID
-    const mockUser = {
-      id,
-      name: "John Doe",
-      email: "john@example.com",
-      role: "User",
-    };
-
+  const fetchUser = async () => {
+    const res = await API.get("/users");
+    const user = res.data.find((u) => u.id === Number(id));
     setFormData({
-      name: mockUser.name,
-      email: mockUser.email,
-      role: mockUser.role,
+      name: user.name,
+      email: user.email,
+      role: user.role,
     });
-  }, [id]);
+  };
+  fetchUser();
+}, [id]);
 
   const handleChange = (e) => {
     setFormData({

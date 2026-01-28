@@ -5,11 +5,15 @@ from extensions import db
 
 users_bp = Blueprint("users", __name__)
 
-@users_bp.route("/", methods=["GET"])
-@jwt_required()
+# ---------- READ ALL USERS ----------
+@users_bp.route("/", methods=["GET", "OPTIONS"])
+@jwt_required(optional=True)
 def get_users():
-    users = User.query.all()
+    # Handle CORS preflight
+    if request.method == "OPTIONS":
+        return jsonify({}), 200
 
+    users = User.query.all()
     return jsonify([
         {
             "id": u.id,
@@ -20,10 +24,18 @@ def get_users():
     ])
 
 
-@users_bp.route("/", methods=["POST"])
-@jwt_required()
+# ---------- CREATE USER ----------
+@users_bp.route("/", methods=["POST", "OPTIONS"])
+@jwt_required(optional=True)
 def create_user():
+    # Handle CORS preflight
+    if request.method == "OPTIONS":
+        return jsonify({}), 200
+
     data = request.get_json()
+
+    if User.query.filter_by(email=data["email"]).first():
+        return jsonify({"msg": "Email already exists"}), 400
 
     user = User(
         name=data["name"],
@@ -36,3 +48,37 @@ def create_user():
     db.session.commit()
 
     return jsonify({"msg": "User created"}), 201
+
+
+# ---------- UPDATE USER ----------
+@users_bp.route("/<int:user_id>", methods=["PUT", "OPTIONS"])
+@jwt_required(optional=True)
+def update_user(user_id):
+    # Handle CORS preflight
+    if request.method == "OPTIONS":
+        return jsonify({}), 200
+
+    user = User.query.get_or_404(user_id)
+    data = request.get_json()
+
+    user.name = data["name"]
+    user.email = data["email"]
+    user.role = data.get("role", user.role)
+
+    db.session.commit()
+    return jsonify({"msg": "User updated"})
+
+
+# ---------- DELETE USER ----------
+@users_bp.route("/<int:user_id>", methods=["DELETE", "OPTIONS"])
+@jwt_required(optional=True)
+def delete_user(user_id):
+    # Handle CORS preflight
+    if request.method == "OPTIONS":
+        return jsonify({}), 200
+
+    user = User.query.get_or_404(user_id)
+    db.session.delete(user)
+    db.session.commit()
+
+    return jsonify({"msg": "User deleted"})
