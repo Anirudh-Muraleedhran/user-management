@@ -22,9 +22,9 @@ def login():
         return jsonify({"msg": "Invalid credentials"}), 401
 
     token = create_access_token(
-        identity=str(user.id),              # ✅ MUST be string
+        identity=str(user.id),              #  MUST be string
         additional_claims={"role": user.role}
-    )
+    )    
 
     return jsonify({
         "access_token": token,

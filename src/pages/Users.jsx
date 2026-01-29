@@ -1,10 +1,17 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import API from "../services/api";
 import "../styles/form.css";
+import { logout } from "../utils/auth";
 
 export default function Users() {
   const [users, setUsers] = useState([]);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
 
   const fetchUsers = async () => {
     const res = await API.get("/users");
@@ -24,7 +31,20 @@ export default function Users() {
 
   return (
     <div className="page-container">
-      <h2>User Management</h2>
+      {/* Header */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "20px",
+        }}
+      >
+        <h2>User Management</h2>
+        <button className="btn-danger" onClick={handleLogout}>
+          Logout
+        </button>
+      </div>
 
       <Link to="/users/add">
         <button className="btn-primary">Add User</button>
