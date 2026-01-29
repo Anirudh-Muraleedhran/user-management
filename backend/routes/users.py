@@ -24,6 +24,23 @@ def get_users():
     ])
 
 
+# ---------- READ SINGLE USER (NEW – REQUIRED FOR EDIT) ----------
+@users_bp.route("/<int:user_id>", methods=["GET", "OPTIONS"])
+@jwt_required(optional=True)
+def get_user(user_id):
+    # Handle CORS preflight
+    if request.method == "OPTIONS":
+        return jsonify({}), 200
+
+    user = User.query.get_or_404(user_id)
+    return jsonify({
+        "id": user.id,
+        "name": user.name,
+        "email": user.email,
+        "role": user.role
+    })
+
+
 # ---------- CREATE USER ----------
 @users_bp.route("/", methods=["POST", "OPTIONS"])
 @jwt_required(optional=True)
